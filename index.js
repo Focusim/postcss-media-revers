@@ -1,21 +1,9 @@
-import * as postcss from 'postcss';
+var postcss = require('postcss')
 
-export default postcss.plugin('postcss-reverse-media', (options = {}) => {
-  // Work with options here
-  return css => {
-    // Transform each rule here
-    /*
-      css.walkDecls(rule => {
+module.exports = postcss.plugin('postcss-reverse-media', function (opts) {
+  opts = opts || {};
 
-        if (rule.type) {
-          css.append(postcss.atRule({
-              params: rule.type,
-              name: 'media',
-          }));
-        }
-      });
-    */
-
+  return function (css, result) {
     css.nodes.forEach(el => {
       if (el.type === 'rule') {
         css.append(postcss.atRule({
@@ -25,5 +13,5 @@ export default postcss.plugin('postcss-reverse-media', (options = {}) => {
         }));
       }
     })
-  };
+  }
 });
