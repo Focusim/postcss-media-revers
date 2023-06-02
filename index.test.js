@@ -1,17 +1,29 @@
-// const postcss = require('postcss')
-//
-// const plugin = require('./')
-//
-// async function run (input, output, opts = { }) {
-//   let result = await postcss([plugin(opts)]).process(input, { from: undefined })
-//   expect(result.css).toEqual(output)
-//   expect(result.warnings()).toHaveLength(0)
-// }
-//
-// /* Write tests here
-//
-// it('does something', async () => {
-//   await run('a{ }', 'a{ }', { })
-// })
-//
-// */
+"use strict";
+
+var postcss = require("postcss");
+
+var objectAssign = require("object-assign");
+
+var defaults = {};
+
+module.exports = options => {
+  var opts = objectAssign({}, defaults, options);
+
+  return {
+    postcssPlugin: "postcss-media-revers",
+
+    Once(css) {
+      css.nodes.forEach(el => {
+        if (el.type === "rule") {
+          css.append(
+            postcss.atRule({
+              params: "(min-width: 1281px)",
+              name: "media",
+              nodes: [el]
+            })
+          );
+        }
+      });
+    }
+  };
+};

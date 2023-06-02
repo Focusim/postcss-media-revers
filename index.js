@@ -1,18 +1,29 @@
 "use strict";
-var postcss = require('postcss')
 
-module.exports = postcss.plugin('postcss-reverse-media', function (opts) {
-  opts = opts || {};
+var postcss = require("postcss");
 
-  return function (css, result) {
-    css.nodes.forEach(el => {
-      if (el.type === 'rule') {
-        css.append(postcss.atRule({
-          params: '(min-width: 1281px)',
-          name: 'media',
-          nodes: [el]
-        }));
-      }
-    })
-  }
-});
+var objectAssign = require("object-assign");
+
+var defaults = {};
+
+module.exports = options => {
+  var opts = objectAssign({}, defaults, options);
+
+  return {
+    postcssPlugin: "postcss-media-revers",
+
+    Once(css) {
+      css.nodes.forEach(el => {
+        if (el.type === "rule") {
+          css.append(
+            postcss.atRule({
+              params: "(min-width: 1281px)",
+              name: "media",
+              nodes: [el]
+            })
+          );
+        }
+      });
+    }
+  };
+};
