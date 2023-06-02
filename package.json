@@ -1,6 +1,6 @@
 {
   "name": "postcss-media-revers",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PostCSS plugin media revers plugin",
   "keywords": ["postcss", "css", "postcss-plugin", "postcss-media-revers"],
   "scripts": {
@@ -9,10 +9,14 @@
   "main": "index.js",
   "author": "RomanG <r.garanin@intensa.ru>",
   "license": "MIT",
-  "repository": "Focusim/postcss-media-revers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Focusim/postcss-media-revers"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
+  "type": "module",
   "peerDependencies": {
     "postcss": "^8.3.0"
   },
