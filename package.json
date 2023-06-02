@@ -1,6 +1,6 @@
 {
   "name": "postcss-media-revers",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "PostCSS plugin media revers plugin",
   "keywords": ["postcss", "css", "postcss-plugin", "postcss-media-revers"],
   "scripts": {
