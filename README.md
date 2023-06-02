@@ -1,18 +1,22 @@
 # postcss-media-revers
 
-[PostCSS] plugin media revers plugin.
+[PostCSS] media revers plugin.
 
-[PostCSS]: https://github.com/postcss/postcss
+[postcss]: https://github.com/postcss/postcss
 
 ```css
+/* Input example */
 .foo {
-  /* Input example */
+  color: #7f7f7f;
 }
 ```
 
 ```css
-.foo {
-  /* Output example */
+/* Output example */
+@media (min-width: 1281px) {
+  .foo {
+    color: #7f7f7f;
+  }
 }
 ```
 
@@ -35,10 +39,11 @@ and set this plugin in settings.
 
 ```diff
 module.exports = {
-  plugins: [
-+   require('postcss-media-revers'),
-    require('autoprefixer')
-  ]
+  plugins: {
++   'postcss-media-revers': {
+      revertMediaPoint: Int
+    }
+  }
 }
 ```
 
