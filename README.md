@@ -41,7 +41,8 @@ and set this plugin in settings.
 module.exports = {
   plugins: {
 +   'postcss-media-revers': {
-      revertMediaPoint: Int
+      revertMediaPoint: Int,
+      banNames: ['fileName'] // base => '_ban'
     }
   }
 }
