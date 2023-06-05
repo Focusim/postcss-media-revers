@@ -21,7 +21,7 @@ module.exports = options => {
       var filePath = css.source.input.file;
       var fileName = filePath.substr(filePath.lastIndexOf("/") + 1);
 
-      if (checkBanFiles(defaults.banNames, fileName)) return;
+      if (checkBanFiles(opts.banNames, fileName)) return;
 
       css.nodes.forEach(el => {
         if (el.type === "rule") {
