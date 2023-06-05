@@ -2,8 +2,6 @@
 
 var postcss = require("postcss");
 
-var _path = require("path");
-
 var objectAssign = require("object-assign");
 
 var defaults = {
@@ -20,8 +18,31 @@ module.exports = options => {
     Once(css) {
       var filePath = css.source.input.file;
       var fileName = filePath.substr(filePath.lastIndexOf("/") + 1);
+      var excludeFile = false;
 
       if (checkBanFiles(opts.banNames, fileName)) return;
+
+      css.walkRules(function(rule) {
+        var file = rule.source && rule.source.input.file;
+
+        if (opts.exclude && file) {
+          if (
+            Object.prototype.toString.call(opts.exclude) === "[object RegExp]"
+          ) {
+            if (isExclude(opts.exclude, file)) return (excludeFile = true);
+          } else if (
+            Object.prototype.toString.call(opts.exclude) === "[object Array]"
+          ) {
+            for (let i = 0; i < opts.exclude.length; i++) {
+              if (isExclude(opts.exclude[i], file)) return (excludeFile = true);
+            }
+          } else {
+            throw new Error("options.exclude should be RegExp or Array.");
+          }
+        }
+      });
+
+      if (excludeFile) return;
 
       css.nodes.forEach(el => {
         if (el.type === "rule") {
@@ -46,4 +67,12 @@ function checkBanFiles(arr, fileName) {
   });
 
   return ban;
+}
+
+function isExclude(reg, file) {
+  if (Object.prototype.toString.call(reg) !== "[object RegExp]") {
+    throw new Error("options.exclude should be RegExp.");
+  }
+
+  return file.match(reg) !== null;
 }
