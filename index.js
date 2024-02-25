@@ -1,78 +1,94 @@
 "use strict";
 
-var postcss = require("postcss");
+const postcss = require("postcss");
+const objectAssign = require("object-assign");
 
-var objectAssign = require("object-assign");
-
-var defaults = {
+const defaults = {
   revertMediaPoint: 1281,
   banNames: ["_ban"]
 };
 
 module.exports = options => {
-  var opts = objectAssign({}, defaults, options);
+  const opts = objectAssign({}, defaults, options);
 
   return {
     postcssPlugin: "postcss-reverse-media",
 
     Once(css) {
-      var filePath = css.source.input.file;
-      var fileName = filePath.substr(filePath.lastIndexOf("/") + 1);
-      var excludeFile = false;
+      const filePath = css.source.input.file;
+      const fileName = filePath.substr(filePath.lastIndexOf("/") + 1);
 
-      if (checkBanFiles(opts.banNames, fileName)) return;
+      // Проверка на ban name
+      if (
+        checkBanFiles(opts.banNames, fileName) ||
+        isFileExcluded(opts.exclude, filePath)
+      ) {
+        return;
+      }
 
-      css.walkRules(function(rule) {
-        var file = rule.source && rule.source.input.file;
-
-        if (opts.exclude && file) {
-          if (
-            Object.prototype.toString.call(opts.exclude) === "[object RegExp]"
-          ) {
-            if (isExclude(opts.exclude, file)) return (excludeFile = true);
-          } else if (
-            Object.prototype.toString.call(opts.exclude) === "[object Array]"
-          ) {
-            for (let i = 0; i < opts.exclude.length; i++) {
-              if (isExclude(opts.exclude[i], file)) return (excludeFile = true);
-            }
-          } else {
-            throw new Error("options.exclude should be RegExp or Array.");
-          }
-        }
-      });
-
-      if (excludeFile) return;
-
-      css.nodes.forEach(el => {
-        if (el.type === "rule") {
-          css.append(
-            postcss.atRule({
-              params: `(min-width: ${opts.revertMediaPoint}px)`,
-              name: "media",
-              nodes: [el]
-            })
-          );
+      css.walkRules(rule => {
+        // Добавляем только декларации со значениями в 'px'
+        if (ruleContainsPxValue(rule)) {
+          const ruleClone = cloneRuleWithPxDeclarations(rule);
+          // Добавляем клонированное правило с декларациями 'px' в медиа-запрос и в начало файла
+          afterRuleInMediaQuery(css, ruleClone, opts.revertMediaPoint, rule);
         }
       });
     }
   };
 };
 
-function checkBanFiles(arr, fileName) {
-  var ban = false;
-
-  arr.forEach(function(banName) {
-    if (fileName.includes(banName)) ban = true;
-  });
-
-  return ban;
+function afterRuleInMediaQuery(css, ruleClone, revertMediaPoint, rule) {
+  css.insertAfter(
+    rule,
+    postcss.atRule({
+      params: `(min-width: ${revertMediaPoint}px)`,
+      name: "media",
+      nodes: [ruleClone]
+    })
+  );
 }
 
-function isExclude(reg, file) {
-  if (Object.prototype.toString.call(reg) !== "[object RegExp]") {
-    throw new Error("options.exclude should be RegExp.");
-  }
+function ruleContainsPxValue(rule) {
+  if (rule.parent.type === "atrule") return;
 
-  return file.match(reg) !== null;
+  let containsPx = false;
+  rule.walkDecls(decl => {
+    if (decl.value.includes("px")) {
+      containsPx = true;
+    }
+  });
+  return containsPx;
+}
+
+function cloneRuleWithPxDeclarations(rule) {
+  const ruleClone = rule.clone();
+  ruleClone.removeAll();
+  rule.walkDecls(decl => {
+    if (decl.value.includes("px")) {
+      ruleClone.append(decl.clone());
+    }
+  });
+
+  return ruleClone;
+}
+
+function checkBanFiles(banNames, fileName) {
+  return banNames.some(banName => fileName.includes(banName));
+}
+
+function isFileExcluded(excludeOption, file) {
+  if (!excludeOption) return false;
+
+  const isRegExp =
+    Object.prototype.toString.call(excludeOption) === "[object RegExp]";
+  const isArray = Array.isArray(excludeOption);
+
+  if (isRegExp) {
+    return excludeOption.test(file);
+  } else if (isArray) {
+    return excludeOption.some(exclude => isFileExcluded(exclude, file));
+  } else {
+    throw new Error("options.exclude should be RegExp or Array.");
+  }
 }
