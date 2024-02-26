@@ -8,6 +8,7 @@
 /* Input example */
 .foo {
   color: #7f7f7f;
+  width: 100px;
 }
 ```
 
@@ -16,6 +17,40 @@
 @media (min-width: 1281px) {
   .foo {
     color: #7f7f7f;
+    width: 100px;
+  }
+}
+```
+
+## Options
+
+### revertMediaPoint: Int (default: 1281)
+
+**Media point** Integration point for a task
+
+### banNames: Array (template: ["_ban"])
+
+**Ban** check file includes
+
+### exclude: Array RegExp (template: [new RegExp('/styles/includes/')])
+
+**Exclude** all files to regular path
+
+### onlyPX: Boolean (default: false)
+
+```css
+/* Input example */
+.foo {
+  color: #7f7f7f;
+  width: 100px;
+}
+```
+
+```css
+/* Output example */
+@media (min-width: 1281px) {
+  .foo {
+    width: 100px;
   }
 }
 ```
@@ -42,7 +77,7 @@ module.exports = {
   plugins: {
 +   'postcss-media-revers': {
       revertMediaPoint: Int,
-      banNames: ['fileName'] // base => '_ban'
+      banNames: ['fileName']
     }
   }
 }

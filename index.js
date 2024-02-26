@@ -5,7 +5,9 @@ const objectAssign = require("object-assign");
 
 const defaults = {
   revertMediaPoint: 1281,
-  banNames: ["_ban"]
+  banNames: ["_ban"],
+  onlyPX: false,
+  exclude: false
 };
 
 module.exports = options => {
@@ -29,7 +31,9 @@ module.exports = options => {
       css.walkRules(rule => {
         // Добавляем только декларации со значениями в 'px'
         if (ruleContainsPxValue(rule)) {
-          const ruleClone = cloneRuleWithPxDeclarations(rule);
+          const ruleClone = opts.onlyPX
+            ? cloneRuleWithPxDeclarations(rule)
+            : rule;
           // Добавляем клонированное правило с декларациями 'px' в медиа-запрос и в начало файла
           afterRuleInMediaQuery(css, ruleClone, opts.revertMediaPoint, rule);
         }
